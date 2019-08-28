@@ -1,0 +1,20 @@
+
+# Windows 10 各版本及OS代码
+Version		OS build
+1507(RTM)	10240
+1511		10586
+1607		14393
+1703		15063
+1709		16299
+1803		17134
+1809		17763
+1903		18362
+
+## 详细更新版本
+详情请见 https://docs.microsoft.com/zh-cn/windows/release-information/
+
+## 企业版和IoT 企业版LTSB/LTSC版本
+Version		服务		上市日期		OS build
+1809		LTSC		2018-11-13		17763.720
+1607		LTSB		2016-08-02		14393.3181
+1507(RTM)	LTSB		2015-07-29		10240.18308
