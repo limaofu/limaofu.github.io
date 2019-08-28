@@ -1,5 +1,5 @@
-�Զ���¼�ű�
-��/etc/profile�ļ���ĩβ׷�ӱ�д�ű����£�
+自动记录脚本
+在/etc/profile文件的末尾追加编写脚本如下：
 
 
 #set user history
@@ -24,18 +24,18 @@ export HISTFILE="/var/log/history/${LOGNAME}/${USER}@${USER_IP}_$DT"
 chmod 660 /var/log/history/${LOGNAME}/*history* 2>/dev/null
 
 
-�����˳���source /etc/profile
+保存退出，source /etc/profile
 
 
 
 
 
-����ű���Ҫ����/etc/profile�ļ���ĩβ������Ĭ��д�˼�¼��־�ļ��ĸ�Ŀ¼�ǣ�/var/log/history
-���Ŀ¼��Ҫ��ʼ��������
+这个脚本需要放在/etc/profile文件的末尾。这里默认写了记录日志文件的根目录是：/var/log/history
+这个目录需要初始化建立，
 
-Ȼ��ͨ�� exportHISTFILE="/var/log/history/${LOGNAME}/${USER}@${USER_IP}_$DT" ���Կ�����¼��־��·����
-/var/log/history/${LOGNAME}���������Ŀ¼Ҳ��Ҫ���Ƚ������ж��ٸ��û�����Ҫ�������ٸ�Ŀ¼��
-����Ҫ��Ŀ¼��ʹ��Ȩ�޸������Ӧ���û���
+然后通过 exportHISTFILE="/var/log/history/${LOGNAME}/${USER}@${USER_IP}_$DT" 可以看到记录日志的路径是
+/var/log/history/${LOGNAME}，所以这个目录也需要事先建立，有多少个用户，就要建立多少个目录，
+而且要把目录的使用权限赋予相对应的用户。
 
-��ÿ���û���¼���˳�����������û�������¼ip��ַ������ʱ��Ϊ�ļ������ļ���
-�ļ�������������û������в�����¼��
+而每次用户登录到退出都会产生以用户名、登录ip地址、操作时间为文件名的文件，
+文件里面包含本次用户的所有操作记录。
