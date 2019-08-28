@@ -1,0 +1,41 @@
+自动记录脚本
+在/etc/profile文件的末尾追加编写脚本如下：
+
+
+#set user history
+history
+USER=`whoami`
+USER_IP=`who -u am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`
+if [ "$USER_IP" = "" ]; then
+    USER_IP=`hostname`
+fi
+if [ ! -d /var/log/history ]; then
+    mkdir /var/log/history
+    chmod 777 /var/log/history
+fi
+if [ ! -d /var/log/history/${LOGNAME} ]; then
+    mkdir /var/log/history/${LOGNAME}
+    chown -R ${LOGNAME}:${LOGNAME} /var/log/history/${LOGNAME}
+    chmod 770 /var/log/history/${LOGNAME}
+fi
+export HISTSIZE=4096
+DT=`date +"%Y%m%d_%H:%M:%S"`
+export HISTFILE="/var/log/history/${LOGNAME}/${USER}@${USER_IP}_$DT"
+chmod 660 /var/log/history/${LOGNAME}/*history* 2>/dev/null
+
+
+保存退出，source /etc/profile
+
+
+
+
+
+这个脚本需要放在/etc/profile文件的末尾。这里默认写了记录日志文件的根目录是：/var/log/history
+这个目录需要初始化建立，
+
+然后通过 exportHISTFILE="/var/log/history/${LOGNAME}/${USER}@${USER_IP}_$DT" 可以看到记录日志的路径是
+/var/log/history/${LOGNAME}，所以这个目录也需要事先建立，有多少个用户，就要建立多少个目录，
+而且要把目录的使用权限赋予相对应的用户。
+
+而每次用户登录到退出都会产生以用户名、登录ip地址、操作时间为文件名的文件，
+文件里面包含本次用户的所有操作记录。
