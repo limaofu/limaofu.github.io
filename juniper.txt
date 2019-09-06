@@ -1,5 +1,5 @@
 
-## Last changed: 2019-09-06 10:01:52 HKT
+## Last changed: 2019-09-06 11:20:09 HKT
 version 12.1X44-D35.5;
 system {
     host-name SZ-SRX550;
@@ -241,6 +241,7 @@ security {
                 }
                 ipsec-vpn wizard_dyn_vpn;
                 user {
+                    cof;
                     hans;
                 }
             }
