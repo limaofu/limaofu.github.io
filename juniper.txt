@@ -1,0 +1,1741 @@
+
+## Last changed: 2019-09-06 10:01:52 HKT
+version 12.1X44-D35.5;
+system {
+    host-name SZ-SRX550;
+    time-zone Asia/Hong_Kong;
+    root-authentication {
+        encrypted-password "$1$TeY2WSEQ$ir1vhn3LDPFcnrarOwK3y0"; ## SECRET-DATA
+    }
+    name-server {
+        121.201.88.88;
+        114.114.114.114;
+        208.67.222.222;
+        208.67.220.220;
+        210.87.250.14;
+        210.87.253.2;
+    }
+    login {
+        user hanswong {
+            full-name "Hans Wong";
+            uid 999;
+            class super-user;
+            authentication {
+                encrypted-password "$1$ZU9iwb0f$CDShmHhEZNQMM4QWnofSC0"; ## SECRET-DATA
+            }
+        }
+        user limaofu {
+            full-name "li mao fu";
+            uid 998;
+            class super-user;
+            authentication {
+                encrypted-password "$1$riyenVFS$BG7ATOA6dGcOb9klFGSJ2/"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login deny;
+        }
+        telnet;
+        web-management {
+            https {
+                system-generated-certificate;
+                interface ge-0/0/2.0;
+            }
+            session {
+                idle-timeout 10;
+            }
+        }
+    }
+    syslog {
+        archive size 100k files 3;
+        user * {
+            any emergency;
+        }
+        file messages {
+            any critical;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands error;
+        }
+    }
+    max-configurations-on-flash 5;
+    max-configuration-rollbacks 5;
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+    processes {
+        general-authentication-service {
+            traceoptions {
+                flag all;
+            }
+        }
+    }
+    ntp {
+        server 202.108.6.95;
+        server 202.112.29.82;
+        server 202.118.1.130;
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input denyac;
+                }
+                sampling {
+                    input;
+                    output;
+                }
+                address 173.248.227.145/28;
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family inet;
+        }
+    }
+    ge-0/0/2 {
+        unit 0 {
+            family inet {
+                filter {
+                    input cnc;
+                }
+                address 10.18.195.254/24;
+            }
+        }
+    }
+    ge-0/0/3 {
+        unit 0 {
+            family inet {
+                address 172.16.1.1/24;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet;
+        }
+    }
+}
+snmp {
+    description "Juniper SR550 S01";
+    location "Hong Kong";
+    contact "hans.sy.wong@qq.com";
+    community prtg {
+        authorization read-only;
+        clients {
+            10.18.195.10/24;
+        }
+    }
+    trap-group prtg {
+        version v2;
+        categories {
+            authentication;
+            link;
+            remote-operations;
+            routing;
+            startup;
+            configuration;
+        }
+        targets {
+            10.18.195.10;
+        }
+    }
+}
+routing-options {
+    static {
+        route 10.18.190.0/24 next-hop 172.16.1.2;
+        route 0.0.0.0/0 next-hop 173.248.227.158;
+    }
+}
+policy-options {
+    prefix-list denylist-attack {
+        42.62.41.71/32;
+        50.198.24.147/32;
+        106.186.18.111/32;
+        122.224.33.142/32;
+        123.157.129.48/32;
+        180.97.79.0/24;
+        183.60.35.79/32;
+        183.61.47.0/24;
+        183.91.33.85/32;
+        211.161.159.14/32;
+        222.43.147.170/32;
+    }
+    prefix-list manager-ip {
+        10.18.0.0/16;
+        58.251.218.30/32;
+        112.95.247.123/32;
+        172.16.1.0/24;
+        183.63.51.130/32;
+    }
+}
+security {
+    ike {
+        traceoptions {
+            file IKE size 4m;
+            flag all;
+        }
+        policy ike_pol_wizard_dyn_vpn {
+            mode aggressive;
+            proposal-set standard;
+            pre-shared-key ascii-text "$9$T3CpO1EhrK1IVwsYoa/CAuRhcyl"; ## SECRET-DATA
+        }
+        gateway gw_wizard_dyn_vpn {
+            ike-policy ike_pol_wizard_dyn_vpn;
+            dynamic {
+                hostname dy_vpn;
+                connections-limit 100;
+                ike-user-type group-ike-id;
+            }
+            external-interface ge-0/0/0.0;
+            xauth access-profile remote_access_profile;
+        }
+    }
+    ipsec {
+        policy ipsec_pol_wizard_dyn_vpn {
+            perfect-forward-secrecy {
+                keys group2;
+            }
+            proposal-set standard;
+        }
+        vpn wizard_dyn_vpn {
+            ike {
+                gateway gw_wizard_dyn_vpn;
+                ipsec-policy ipsec_pol_wizard_dyn_vpn;
+            }
+        }
+    }
+    utm {
+        feature-profile {
+            anti-virus {
+                type sophos-engine;
+            }
+        }
+        utm-policy default-av {
+            anti-virus {
+                http-profile junos-sophos-av-defaults;
+                ftp {
+                    upload-profile junos-sophos-av-defaults;
+                    download-profile junos-sophos-av-defaults;
+                }
+                smtp-profile junos-sophos-av-defaults;
+                pop3-profile junos-sophos-av-defaults;
+                imap-profile junos-sophos-av-defaults;
+            }
+        }
+    }
+    dynamic-vpn {
+        access-profile remote_access_profile;
+        clients {
+            wizard-dyn-group {
+                remote-protected-resources {
+                    10.18.195.0/24;
+                }
+                ipsec-vpn wizard_dyn_vpn;
+                user {
+                    hans;
+                }
+            }
+        }
+    }
+    flow {
+        traceoptions {
+            file telnet size 3m files 3;
+            flag basic-datapath;
+            flag packet-drops;
+            packet-filter 1 {
+                source-prefix 192.168.118.10/32;
+                destination-prefix 121.201.65.38/32;
+                destination-port 2888;
+            }
+        }
+    }
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ip-sweep threshold 1000;
+                fragment;
+                large;
+                flood threshold 200;
+                ping-death;
+            }
+            ip {
+                bad-option;
+                stream-option;
+                spoofing;
+                source-route-option;
+                unknown-protocol;
+                tear-drop;
+            }
+            tcp {
+                syn-fin;
+                fin-no-ack;
+                tcp-no-flag;
+                syn-frag;
+                port-scan threshold 1000;
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    timeout 20;
+                }
+                land;
+                winnuke;
+                tcp-sweep threshold 1000;
+            }
+            udp {
+                flood threshold 1000;
+            }
+        }
+    }
+    nat {
+        source {
+            pool pool_172_1 {
+                address {
+                    172.16.1.1/32;
+                }
+            }
+            pool pool_65_32 {
+                address {
+                    121.201.65.36/32;
+                }
+            }
+            rule-set nsw_srcnat {
+                from zone trust;
+                to zone [ HK Internet ];
+                rule nsw-src-36 {
+                    match {
+                        source-address 10.18.195.111/32;
+                        destination-address 0.0.0.0/0;
+                    }
+                    then {
+                        source-nat {
+                            pool {
+                                pool_65_32;
+                            }
+                        }
+                    }
+                }
+                rule nsw-src-interface {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 0.0.0.0/0;
+                    }
+                    then {
+                        source-nat {
+                            interface;
+                        }
+                    }
+                }
+            }
+            rule-set untrus_trust {
+                from zone Internet;
+                to zone MSTP;
+                rule 1 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 172.16.1.0/24;
+                    }
+                    then {
+                        source-nat {
+                            interface;
+                        }
+                    }
+                }
+            }
+        }
+        destination {
+            pool 195_90 {
+                address 10.18.195.90/32 port 80;
+            }
+            pool 195_100 {
+                address 10.18.195.100/32 port 21;
+            }
+            pool 195_100_13001 {
+                address 10.18.195.100/32 port 13001;
+            }
+            pool 195_100_13002 {
+                address 10.18.195.100/32 port 13002;
+            }
+            pool 195_100_13003 {
+                address 10.18.195.100/32 port 13003;
+            }
+            pool 195_2 {
+                address 10.18.195.2/32 port 3389;
+            }
+            pool 195_108_7074 {
+                address 10.18.195.108/32 port 7074;
+            }
+            pool 195_11_80 {
+                address 10.18.195.11/32 port 80;
+            }
+            pool 195_11_443 {
+                address 10.18.195.11/32 port 443;
+            }
+            pool 195_103_8087 {
+                address 10.18.195.103/32 port 8087;
+            }
+            pool 195_50_443 {
+                address 10.18.195.50/32 port 443;
+            }
+            pool 195_90_443 {
+                address 10.18.195.90/32 port 443;
+            }
+            pool 172_2_2443 {
+                address 172.16.1.2/32 port 2443;
+            }
+            pool 172_2_3443 {
+                address 172.16.1.2/32 port 3443;
+            }
+            pool 172_2_4443 {
+                address 172.16.1.2/32 port 4443;
+            }
+            pool 172_2_5443 {
+                address 172.16.1.2/32 port 5443;
+            }
+            pool 195_44_80 {
+                address 10.18.195.44/32 port 80;
+            }
+            pool 195_44_443 {
+                address 10.18.195.44/32 port 443;
+            }
+            pool 195_108_80 {
+                address 10.18.195.108/32 port 80;
+            }
+            pool 195_59_80 {
+                routing-instance {
+                    default;
+                }
+                address 10.18.195.59/32 port 80;
+            }
+            pool 195_59_443 {
+                routing-instance {
+                    default;
+                }
+                address 10.18.195.59/32 port 443;
+            }
+            pool 195_108_443 {
+                routing-instance {
+                    default;
+                }
+                address 10.18.195.108/32 port 443;
+            }
+            pool 195_102_8081 {
+                address 10.18.195.102/32 port 8081;
+            }
+            pool 195_10_9090 {
+                address 10.18.195.10/32 port 9090;
+            }
+            pool 195_103_8090 {
+                address 10.18.195.103/32 port 8090;
+            }
+            pool 195_111_6060 {
+                address 10.18.195.111/32 port 6060;
+            }
+            pool 195_111_6061 {
+                address 10.18.195.111/32 port 6061;
+            }
+            pool 195_96_443 {
+                address 10.18.195.96/32 port 443;
+            }
+            pool 195_108_7081 {
+                address 10.18.195.108/32 port 7081;
+            }
+            pool 195_102_8050 {
+                address 10.18.195.102/32 port 8050;
+            }
+            pool 195_85_443 {
+                address 10.18.195.85/32 port 443;
+            }
+            pool 195_100_7710 {
+                address 10.18.195.100/32 port 7710;
+            }
+            pool 195_102_443 {
+                address 10.18.195.102/32 port 443;
+            }
+            pool 195_103_443 {
+                address 10.18.195.103/32 port 443;
+            }
+            pool 195_41 {
+                address 10.18.195.41/32 port 3389;
+            }
+            pool 195_246 {
+                address 10.18.195.246/32 port 3389;
+            }
+            rule-set destnat-app {
+                from zone [ HK Internet ];
+                rule BO_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.148/32;
+                        destination-port 443;
+                    }
+                    then {
+                        destination-nat pool 195_90_443;
+                    }
+                }
+                rule BO_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.148/32;
+                        destination-port 80;
+                    }
+                    then {
+                        destination-nat pool 195_90;
+                    }
+                }
+                rule Web_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.146/32;
+                        destination-port 7443;
+                    }
+                    then {
+                        destination-nat pool 195_50_443;
+                    }
+                }
+                rule Allinpay_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.152/32;
+                        destination-port 8081;
+                    }
+                    then {
+                        destination-nat pool 195_102_8081;
+                    }
+                }
+                rule Payeco_8090_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.153/32;
+                        destination-port 8090;
+                    }
+                    then {
+                        destination-nat pool 195_103_8090;
+                    }
+                }
+                rule Payeco_8087_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.153/32;
+                        destination-port 8087;
+                    }
+                    then {
+                        destination-nat pool 195_103_8087;
+                    }
+                }
+                rule FTP_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 21;
+                    }
+                    then {
+                        destination-nat pool 195_100;
+                    }
+                }
+                rule FTP_13001_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 13001;
+                    }
+                    then {
+                        destination-nat pool 195_100_13001;
+                    }
+                }
+                rule FTP_13002_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 13002;
+                    }
+                    then {
+                        destination-nat pool 195_100_13002;
+                    }
+                }
+                rule FTP_13003_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 13003;
+                    }
+                    then {
+                        destination-nat pool 195_100_13003;
+                    }
+                }
+                rule Remote_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.145/32;
+                        destination-port 3389;
+                    }
+                    then {
+                        destination-nat pool 195_2;
+                    }
+                }
+                rule UAT_7074_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.154/32;
+                        destination-port 7074;
+                    }
+                    then {
+                        destination-nat pool 195_108_7074;
+                    }
+                }
+                rule UAT_7081_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.154/32;
+                        destination-port 7081;
+                    }
+                    then {
+                        destination-nat pool 195_108_7081;
+                    }
+                }
+                rule MT4_S1_443 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.145/32;
+                        destination-port 2443;
+                    }
+                    then {
+                        destination-nat pool 172_2_2443;
+                    }
+                }
+                rule MT4_S2_443 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.145/32;
+                        destination-port 3443;
+                    }
+                    then {
+                        destination-nat pool 172_2_3443;
+                    }
+                }
+                rule MT4_S3_443 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.145/32;
+                        destination-port 4443;
+                    }
+                    then {
+                        destination-nat pool 172_2_4443;
+                    }
+                }
+                rule MT4_S4_443 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.145/32;
+                        destination-port 5443;
+                    }
+                    then {
+                        destination-nat pool 172_2_5443;
+                    }
+                }
+                rule UAT_80 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.149/32;
+                        destination-port 80;
+                    }
+                    then {
+                        destination-nat pool 195_44_80;
+                    }
+                }
+                rule UAT_443 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.149/32;
+                        destination-port 443;
+                    }
+                    then {
+                        destination-nat pool 195_44_443;
+                    }
+                }
+                rule Image_UAT_80_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.154/32;
+                        destination-port 80;
+                    }
+                    then {
+                        destination-nat pool 195_108_80;
+                    }
+                }
+                rule Image_80_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.147/32;
+                        destination-port 80;
+                    }
+                    then {
+                        destination-nat pool 195_59_80;
+                    }
+                }
+                rule Image_59_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.147/32;
+                        destination-port 443;
+                    }
+                    then {
+                        destination-nat pool 195_59_443;
+                    }
+                }
+                rule Image_108_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.154/32;
+                        destination-port 443;
+                    }
+                    then {
+                        destination-nat pool 195_108_443;
+                    }
+                }
+                rule prtg_9090_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.156/32;
+                        destination-port 9090;
+                    }
+                    then {
+                        destination-nat pool 195_10_9090;
+                    }
+                }
+                rule Dinpay_6060_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.156/32;
+                        destination-port 6060;
+                    }
+                    then {
+                        destination-nat pool 195_111_6060;
+                    }
+                }
+                rule Dinpay_6061_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.156/32;
+                        destination-port 6061;
+                    }
+                    then {
+                        destination-nat pool 195_111_6061;
+                    }
+                }
+                rule Salesbo_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.156/32;
+                        destination-port 2888;
+                    }
+                    then {
+                        destination-nat pool 195_96_443;
+                    }
+                }
+                rule Analytics_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.150/32;
+                        destination-port 6443;
+                    }
+                    then {
+                        destination-nat pool 195_85_443;
+                    }
+                }
+                rule FTP_7710_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 7710;
+                    }
+                    then {
+                        destination-nat pool 195_100_7710;
+                    }
+                }
+                rule test_195_246 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.149/32;
+                        destination-port 8862;
+                    }
+                    then {
+                        destination-nat pool 195_246;
+                    }
+                }
+            }
+            rule-set yingshe {
+                from zone Internet;
+                rule 195_41_3389 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 173.248.227.151/32;
+                        destination-port 3389;
+                    }
+                    then {
+                        destination-nat pool 195_41;
+                    }
+                }
+            }
+        }
+        proxy-arp {
+            interface ge-0/0/0.0 {
+                address {
+                    173.248.227.146/28 to 173.248.227.157/28;
+                }
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone Internet {
+            policy All_trust_Internet {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy trust-Internet-av {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+        }
+        from-zone Internet to-zone trust {
+            policy BO_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_90;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy BO_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_90;
+                    application tcp-80;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Web_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_50;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Allinpay_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_102;
+                    application allin_group;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Payeco_8090_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_103;
+                    application tcp-8090;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Payeco_8087_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_103;
+                    application tcp-8087;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy FTP_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_100;
+                    application ftp_group;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Remote_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_2;
+                    application tcp-3389;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy UAT_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_108;
+                    application uat_group;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy UAT_80_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_44;
+                    application tcp-80;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy UAT_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_44;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy MT4_S1_3389_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 172_2;
+                    application tcp-3389;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Image_80_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_59;
+                    application tcp-80;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Image_59_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_59;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy prtg_9090_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_10;
+                    application tcp-9090;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Dinpay_6060_Internet-trust {
+                match {
+                    source-address any;
+                    destination-address 195_111;
+                    application dinpay_group;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Salesbo_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_96;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy Analytics_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_85;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy remote_Internet_trust41 {
+                match {
+                    source-address any;
+                    destination-address 195_41;
+                    application tcp-3389;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy test_195_246_3389 {
+                match {
+                    source-address any;
+                    destination-address 195_246;
+                    application tcp-3389;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy 195_108_internet123 {
+                match {
+                    source-address any;
+                    destination-address 195_108;
+                    application tcp-7081;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy policy_in_wizard_dyn_vpn {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit {
+                        tunnel {
+                            ipsec-vpn wizard_dyn_vpn;
+                        }
+                    }
+                }
+            }
+            policy fanglesuo137 {
+                description fanglesuo137;
+                match {
+                    source-address any;
+                    destination-address any;
+                    application tcp-137;
+                }
+                then {
+                    deny;
+                }
+            }
+            policy fanglesuo {
+                description fanglesuo135;
+                match {
+                    source-address any;
+                    destination-address any;
+                    application tcp-135;
+                }
+                then {
+                    deny;
+                }
+            }
+            policy fanglesuo138 {
+                description fanglesuo138;
+                match {
+                    source-address any;
+                    destination-address any;
+                    application tcp-138;
+                }
+                then {
+                    deny;
+                }
+            }
+            policy fanglesuo139 {
+                description fanglesuo139;
+                match {
+                    source-address any;
+                    destination-address any;
+                    application tcp-139;
+                }
+                then {
+                    deny;
+                }
+            }
+            policy fanglesuo445 {
+                description fanglesuo445;
+                match {
+                    source-address any;
+                    destination-address any;
+                    application tcp-445;
+                }
+                then {
+                    deny;
+                }
+            }
+        }
+        from-zone HK to-zone trust {
+            policy MT4_HK_trust {
+                match {
+                    source-address any;
+                    destination-address MT4-443;
+                    application tcp-444;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone HK {
+            policy All_trust_HK {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone trust to-zone MSTP {
+            policy for_all {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone MSTP to-zone trust {
+            policy for_all {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+        from-zone Internet to-zone MSTP {
+            policy 172_2_Internet_MSTP {
+                match {
+                    source-address any;
+                    destination-address 1_2;
+                    application [ tcp-2443 tcp-3443 tcp-4443 tcp-5443 tcp-2881 tcp-2882 tcp-2883 tcp-2884 ];
+                }
+                then {
+                    permit;
+                }
+            }
+        }
+    }
+    zones {
+        security-zone trust {
+            address-book {
+                address 195_80 10.18.195.80/32;
+                address 195_81 10.18.195.81/32;
+                address 195_1 10.18.195.1/32;
+                address 195_2 10.18.195.2/32;
+                address 195_100 10.18.195.100/32;
+                address 195_101 10.18.195.101/32;
+                address 195_102 10.18.195.102/32;
+                address 195_103 10.18.195.103/32;
+                address 195_104 10.18.195.104/32;
+                address 195_105 10.18.195.105/32;
+                address 195_106 10.18.195.106/32;
+                address 195_50 10.18.195.50/32;
+                address 195_60 10.18.195.60/32;
+                address 195_3 10.18.195.3/32;
+                address 195_4 10.18.195.4/32;
+                address 195_61 10.18.195.61/32;
+                address 195_62 10.18.195.62/32;
+                address 195_54 10.18.195.54/32;
+                address 195_108 10.18.195.108/32;
+                address 195_11 10.18.195.11/32;
+                address 195_63 10.18.195.63/32;
+                address 195_12 10.18.195.12/32;
+                address 172_2 172.16.1.2/32;
+                address 195_44 10.18.195.44/32;
+                address 195_59 10.18.195.59/32;
+                address 195_90 10.18.195.90/32;
+                address 195_10 10.18.195.10/32;
+                address 195_111 10.18.195.111/32;
+                address 195_96 10.18.195.96/32;
+                address 195_85 10.18.195.85/32;
+                address 195_41 10.18.195.41/32;
+                address 195_246 10.18.195.246/32;
+                address-set MT4-443 {
+                    address 195_60;
+                    address 195_61;
+                    address 195_62;
+                }
+            }
+            interfaces {
+                ge-0/0/2.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ping;
+                            https;
+                            http;
+                            telnet;
+                            snmp;
+                            snmp-trap;
+                            ssh;
+                        }
+                    }
+                }
+            }
+        }
+        security-zone HK {
+            interfaces {
+                ge-0/0/1.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ping;
+                            telnet;
+                            http;
+                        }
+                    }
+                }
+            }
+        }
+        security-zone Internet {
+            address-book {
+                address 247_123 112.95.247.123/32;
+                address 51_130 183.63.51.130/32;
+                address 75_146 202.131.75.146/32;
+                address 217_254 58.177.217.254/32;
+                address 7_146 23.234.7.146/32;
+                address 24_98 23.234.24.98/32;
+                address 159_138_32_26 159.138.32.26/32;
+                address-set web_white {
+                    address 247_123;
+                    address 51_130;
+                    address 75_146;
+                    address 217_254;
+                    address 7_146;
+                    address 24_98;
+                }
+            }
+            screen untrust-screen;
+            interfaces {
+                ge-0/0/0.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ssh;
+                            ike;
+                            ping;
+                            https;
+                        }
+                    }
+                }
+            }
+            application-tracking;
+        }
+        security-zone MSTP {
+            address-book {
+                address 1_2 172.16.1.2/32;
+            }
+            interfaces {
+                ge-0/0/3.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            all;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+firewall {
+    family inet {
+        filter denyac {
+            term deny-list {
+                from {
+                    prefix-list {
+                        denylist-attack;
+                    }
+                }
+                then {
+                    discard;
+                }
+            }
+            term other-accept {
+                then accept;
+            }
+        }
+    }
+    filter cnc {
+        term ISP {
+            from {
+                source-address {
+                    10.18.195.100/32;
+                }
+                destination-address {
+                    103.14.78.0/24;
+                }
+            }
+            then {
+                routing-instance ISP;
+            }
+        }
+        term accept {
+            then accept;
+        }
+    }
+    filter manager-ip {
+        term block_non_manager {
+            from {
+                source-address {
+                    0.0.0.0/0;
+                }
+                source-prefix-list {
+                    manager-ip except;
+                }
+                protocol tcp;
+                destination-port [ ssh https telnet http ];
+            }
+            then {
+                discard;
+            }
+        }
+        term accept_everything_else {
+            then accept;
+        }
+    }
+}
+access {
+    profile remote_access_profile {
+        authentication-order password;
+        client cof {
+            firewall-user {
+                password "$9$t1o2OBE7NboaU-dk.5T3nlKvWNdgoJ"; ## SECRET-DATA
+            }
+        }
+        address-assignment {
+            pool dyn-vpn-address-pool;
+        }
+    }
+    address-assignment {
+        pool dyn-vpn-address-pool {
+            family inet {
+                network 10.18.200.0/24;
+                xauth-attributes {
+                    primary-dns 114.114.114.114/32;
+                }
+            }
+        }
+    }
+    firewall-authentication {
+        web-authentication {
+            default-profile remote_access_profile;
+        }
+    }
+}
+applications {
+    application tcp-80 {
+        protocol tcp;
+        destination-port 80;
+    }
+    application tcp-8081 {
+        protocol tcp;
+        destination-port 8081;
+    }
+    application tcp-9999 {
+        protocol tcp;
+        destination-port 9999;
+    }
+    application tcp-443 {
+        protocol tcp;
+        destination-port 443;
+    }
+    application ftp-21 {
+        protocol tcp;
+        destination-port 21;
+    }
+    application ftp-13001 {
+        protocol tcp;
+        destination-port 13001;
+    }
+    application ftp-13002 {
+        protocol tcp;
+        destination-port 13002;
+    }
+    application ftp-13003 {
+        protocol tcp;
+        destination-port 13003;
+    }
+    application tcp-3389 {
+        protocol tcp;
+        destination-port 3389;
+    }
+    application tcp-9998 {
+        protocol tcp;
+        destination-port 9998;
+    }
+    application tcp-444 {
+        protocol tcp;
+        destination-port 444;
+    }
+    application tcp-1445 {
+        protocol tcp;
+        destination-port 1445;
+    }
+    application tcp-1443 {
+        protocol tcp;
+        destination-port 1443;
+    }
+    application tcp-1444 {
+        protocol tcp;
+        destination-port 1444;
+    }
+    application tcp-8088 {
+        protocol tcp;
+        destination-port 8088;
+    }
+    application tcp-9997 {
+        protocol tcp;
+        destination-port 9997;
+    }
+    application tcp-8082 {
+        protocol tcp;
+        destination-port 8082;
+    }
+    application tcp-9958 {
+        protocol tcp;
+        destination-port 9958;
+    }
+    application tcp-7070 {
+        protocol tcp;
+        destination-port 7070;
+    }
+    application tcp-7071 {
+        protocol tcp;
+        destination-port 7071;
+    }
+    application tcp-7072 {
+        protocol tcp;
+        destination-port 7072;
+    }
+    application tcp-7073 {
+        protocol tcp;
+        destination-port 7073;
+    }
+    application tcp-7074 {
+        protocol tcp;
+        destination-port 7074;
+    }
+    application tcp-7075 {
+        protocol tcp;
+        destination-port 7075;
+    }
+    application tcp-8083 {
+        protocol tcp;
+        destination-port 8083;
+    }
+    application tcp-8084 {
+        protocol tcp;
+        destination-port 8084;
+    }
+    application tcp-2443 {
+        protocol tcp;
+        destination-port 2443;
+    }
+    application tcp-8087 {
+        protocol tcp;
+        destination-port 8087;
+    }
+    application tcp-7076 {
+        protocol tcp;
+        destination-port 7076;
+    }
+    application tcp-8089 {
+        protocol tcp;
+        destination-port 8089;
+    }
+    application tcp-3443 {
+        protocol tcp;
+        destination-port 3443;
+    }
+    application tcp-4443 {
+        protocol tcp;
+        destination-port 4443;
+    }
+    application tcp-5443 {
+        protocol tcp;
+        destination-port 5443;
+    }
+    application tcp-7077 {
+        protocol tcp;
+        destination-port 7077;
+    }
+    application tcp-7078 {
+        protocol tcp;
+        destination-port 7078;
+    }
+    application tcp-8085 {
+        protocol tcp;
+        destination-port 8085;
+    }
+    application tcp-8086 {
+        protocol tcp;
+        destination-port 8086;
+    }
+    application tcp-8080 {
+        protocol tcp;
+        destination-port 8080;
+    }
+    application tcp-9090 {
+        protocol tcp;
+        destination-port 9090;
+    }
+    application tcp-7079 {
+        protocol tcp;
+        destination-port 7079;
+    }
+    application tcp-8090 {
+        protocol tcp;
+        destination-port 8090;
+    }
+    application tcp-6060 {
+        protocol tcp;
+        destination-port 6060;
+    }
+    application tcp-6061 {
+        protocol tcp;
+        destination-port 6061;
+    }
+    application tcp-7080 {
+        protocol tcp;
+        destination-port 7080;
+    }
+    application tcp-8091 {
+        protocol tcp;
+        destination-port 8091;
+    }
+    application tcp-2888 {
+        protocol tcp;
+        destination-port 2888;
+    }
+    application tcp-6688 {
+        protocol tcp;
+        destination-port 6688;
+    }
+    application tcp-7081 {
+        protocol tcp;
+        destination-port 7081;
+    }
+    application tcp-8050 {
+        protocol tcp;
+        destination-port 8050;
+    }
+    application tcp-6443 {
+        protocol tcp;
+        destination-port 6443;
+    }
+    application tcp-7710 {
+        protocol tcp;
+        destination-port 7710;
+    }
+    application tcp-8443 {
+        protocol tcp;
+        destination-port 8443;
+    }
+    application tcp-9443 {
+        protocol tcp;
+        destination-port 9443;
+    }
+    application tcp-135 {
+        protocol tcp;
+        destination-port 135;
+    }
+    application tcp-139 {
+        protocol tcp;
+        destination-port 139;
+    }
+    application tcp-445 {
+        protocol tcp;
+        destination-port 445;
+    }
+    application tcp-137 {
+        protocol tcp;
+        destination-port 137;
+    }
+    application tcp-138 {
+        protocol tcp;
+        destination-port 138;
+    }
+    application tcp-2881 {
+        protocol tcp;
+        destination-port 2881;
+    }
+    application tcp-2882 {
+        protocol tcp;
+        destination-port 2882;
+    }
+    application tcp-2883 {
+        protocol tcp;
+        destination-port 2883;
+    }
+    application tcp-2884 {
+        protocol tcp;
+        destination-port 2884;
+    }
+    application tcp-8862 {
+        protocol tcp;
+        destination-port 8862;
+    }
+    application-set ftp_group {
+        application ftp-21;
+        application ftp-13001;
+        application ftp-13002;
+        application ftp-13003;
+        application tcp-7710;
+    }
+    application-set uat_group {
+        application tcp-7074;
+        application tcp-80;
+        application tcp-443;
+        application tcp-8443;
+    }
+    application-set tctest_group {
+        application tcp-80;
+        application tcp-443;
+    }
+    application-set allin_group {
+        application tcp-8081;
+        application tcp-8050;
+    }
+    application-set dinpay_group {
+        application tcp-6060;
+        application tcp-6061;
+    }
+    application-set salesbo_group {
+        application tcp-443;
+    }
+}
