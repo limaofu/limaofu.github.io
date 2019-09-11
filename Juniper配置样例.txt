@@ -1,0 +1,648 @@
+
+## Last changed: 2019-09-11 11:20:09 CST
+version 12.1X44-D35.5;
+system {
+    host-name SRX550;
+    time-zone Asia/ShangHai;
+    root-authentication {
+        encrypted-password "$1$TeXXXXXX$ir1vhn3LDPFcnrarOwK3y0"; ## SECRET-DATA
+    }
+    name-server {
+        114.114.114.114;
+        208.67.222.222;
+    }
+    login {
+        user limaofu {
+            full-name "li mao fu";
+            uid 998;
+            class super-user;
+            authentication {
+                encrypted-password "$1$riyenVXXXXX7ATOA6dGcOb9klFGSJ2/"; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login deny;
+        }
+        telnet;
+        web-management {
+            https {
+                system-generated-certificate;
+                interface ge-0/0/2.0;
+            }
+            session {
+                idle-timeout 10;
+            }
+        }
+    }
+    syslog {
+        archive size 100k files 3;
+        user * {
+            any emergency;
+        }
+        file messages {
+            any critical;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands error;
+        }
+    }
+    max-configurations-on-flash 5;
+    max-configuration-rollbacks 5;
+    license {
+        autoupdate {
+            url https://ae1.juniper.net/junos/key_retrieval;
+        }
+    }
+    processes {
+        general-authentication-service {
+            traceoptions {
+                flag all;
+            }
+        }
+    }
+    ntp {
+        server 202.108.6.95;
+        server 202.112.29.82;
+        server 202.118.1.130;
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input denyac;
+                }
+                sampling {
+                    input;
+                    output;
+                }
+                address 199.88.44.299/28;
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family inet;
+        }
+    }
+    ge-0/0/2 {
+        unit 0 {
+            family inet {
+                filter {
+                    input cnc;
+                }
+                address 10.128.195.254/24;
+            }
+        }
+    }
+    ge-0/0/3 {
+        unit 0 {
+            family inet {
+                address 172.16.1.1/24;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet;
+        }
+    }
+}
+snmp {
+    description "Juniper SR550";
+    location "ZHONGGUO";
+    contact "XXX@163.com";
+    community prtg {
+        authorization read-only;
+        clients {
+            10.218.195.10/24;
+        }
+    }
+    trap-group prtg {
+        version v2;
+        categories {
+            authentication;
+            link;
+            remote-operations;
+            routing;
+            startup;
+            configuration;
+        }
+        targets {
+            10.218.195.10;
+        }
+    }
+}
+routing-options {
+    static {
+        route 10.128.190.0/24 next-hop 172.16.1.2;
+        route 0.0.0.0/0 next-hop 199.33.44.222;
+    }
+}
+policy-options {
+    prefix-list denylist-attack {
+        42.62.41.71/32;
+        50.198.24.147/32;
+    }
+    prefix-list manager-ip {
+        10.18.0.0/16;
+        199.88.44.244/32;
+    }
+}
+security {
+    ike {
+        traceoptions {
+            file IKE size 4m;
+            flag all;
+        }
+        policy ike_pol_wizard_dyn_vpn {
+            mode aggressive;
+            proposal-set standard;
+            pre-shared-key ascii-text "$9$T12345EhrK1IVwsYoa/CAuRhcyl"; ## SECRET-DATA
+        }
+        gateway gw_wizard_dyn_vpn {
+            ike-policy ike_pol_wizard_dyn_vpn;
+            dynamic {
+                hostname dy_vpn;
+                connections-limit 100;
+                ike-user-type group-ike-id;
+            }
+            external-interface ge-0/0/0.0;
+            xauth access-profile remote_access_profile;
+        }
+    }
+    ipsec {
+        policy ipsec_pol_wizard_dyn_vpn {
+            perfect-forward-secrecy {
+                keys group2;
+            }
+            proposal-set standard;
+        }
+        vpn wizard_dyn_vpn {
+            ike {
+                gateway gw_wizard_dyn_vpn;
+                ipsec-policy ipsec_pol_wizard_dyn_vpn;
+            }
+        }
+    }
+    utm {
+        feature-profile {
+            anti-virus {
+                type sophos-engine;
+            }
+        }
+        utm-policy default-av {
+            anti-virus {
+                http-profile junos-sophos-av-defaults;
+                ftp {
+                    upload-profile junos-sophos-av-defaults;
+                    download-profile junos-sophos-av-defaults;
+                }
+                smtp-profile junos-sophos-av-defaults;
+                pop3-profile junos-sophos-av-defaults;
+                imap-profile junos-sophos-av-defaults;
+            }
+        }
+    }
+    dynamic-vpn {
+        access-profile remote_access_profile;
+        clients {
+            wizard-dyn-group {
+                remote-protected-resources {
+                    10.118.195.0/24;
+                }
+                ipsec-vpn wizard_dyn_vpn;
+                user {
+                    cof;
+                    BOSS;
+                }
+            }
+        }
+    }
+    flow {
+        traceoptions {
+            file telnet size 3m files 3;
+            flag basic-datapath;
+            flag packet-drops;
+            packet-filter 1 {
+                source-prefix 192.168.118.10/32;
+                destination-prefix 191.291.625.318/32;
+                destination-port 2888;
+            }
+        }
+    }
+    screen {
+        ids-option untrust-screen {
+            icmp {
+                ip-sweep threshold 1000;
+                fragment;
+                large;
+                flood threshold 200;
+                ping-death;
+            }
+            ip {
+                bad-option;
+                stream-option;
+                spoofing;
+                source-route-option;
+                unknown-protocol;
+                tear-drop;
+            }
+            tcp {
+                syn-fin;
+                fin-no-ack;
+                tcp-no-flag;
+                syn-frag;
+                port-scan threshold 1000;
+                syn-flood {
+                    alarm-threshold 1024;
+                    attack-threshold 200;
+                    source-threshold 1024;
+                    destination-threshold 2048;
+                    timeout 20;
+                }
+                land;
+                winnuke;
+                tcp-sweep threshold 1000;
+            }
+            udp {
+                flood threshold 1000;
+            }
+        }
+    }
+    nat {
+        source {
+            pool pool_172_1 {
+                address {
+                    172.16.1.1/32;
+                }
+            }
+            pool pool_65_32 {
+                address {
+                    881.291.565.36/32;
+                }
+            }
+            rule-set nsw_srcnat {
+                from zone trust;
+                to zone [ HK Internet ];
+                rule nsw-src-36 {
+                    match {
+                        source-address 10.318.195.111/32;
+                        destination-address 0.0.0.0/0;
+                    }
+                    then {
+                        source-nat {
+                            pool {
+                                pool_65_32;
+                            }
+                        }
+                    }
+                }
+                rule nsw-src-interface {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 0.0.0.0/0;
+                    }
+                    then {
+                        source-nat {
+                            interface;
+                        }
+                    }
+                }
+            }
+            rule-set untrus_trust {
+                from zone Internet;
+                to zone MSTP;
+                rule 1 {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 172.16.1.0/24;
+                    }
+                    then {
+                        source-nat {
+                            interface;
+                        }
+                    }
+                }
+            }
+        }
+        destination {
+            pool 195_90 {
+                address 10.18.195.90/32 port 80;
+            }
+            pool 195_100 {
+                address 10.18.195.100/32 port 21;
+            }
+            
+            pool 195_59_80 {
+                routing-instance {
+                    default;
+                }
+                address 10.18.195.59/32 port 80;
+            }
+            pool 195_59_443 {
+                routing-instance {
+                    default;
+                }
+                address 10.18.195.59/32 port 443;
+            }
+          
+            rule-set destnat-app {
+                from zone [ HK Internet ];
+                rule BO_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 44.222.345.22/32;
+                        destination-port 443;
+                    }
+                    then {
+                        destination-nat pool 195_90_443;
+                    }
+                }
+                rule BO_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 44.222.345.22/32;
+                        destination-port 80;
+                    }
+                    then {
+                        destination-nat pool 195_90;
+                    }
+                }
+                rule Web_443_trust {
+                    match {
+                        source-address 0.0.0.0/0;
+                        destination-address 44.222.345.226/32;
+                        destination-port 7443;
+                    }
+                    then {
+                        destination-nat pool 195_50_443;
+                    }
+                }
+        proxy-arp {
+            interface ge-0/0/0.0 {
+                address {
+                    44.222.345.20/28 to 44.222.345.22/28;
+                }
+            }
+        }
+    }
+    policies {
+        from-zone trust to-zone Internet {
+            policy All_trust_Internet {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy trust-Internet-av {
+                match {
+                    source-address any;
+                    destination-address any;
+                    application any;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+        }
+        from-zone Internet to-zone trust {
+            policy BO_443_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_90;
+                    application tcp-443;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+            policy BO_Internet_trust {
+                match {
+                    source-address any;
+                    destination-address 195_90;
+                    application tcp-80;
+                }
+                then {
+                    permit {
+                        application-services {
+                            utm-policy default-av;
+                        }
+                    }
+                }
+            }
+    }
+    zones {
+        security-zone trust {
+            address-book {
+                address 195_80 10.18.195.80/32;
+                address 195_81 10.18.195.81/32;
+                address 195_1 10.18.195.1/32;
+                    address 195_61;
+                    address 195_62;
+                }
+            }
+            interfaces {
+                ge-0/0/2.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ping;
+                            https;
+                            http;
+                            telnet;
+                            snmp;
+                            snmp-trap;
+                            ssh;
+                        }
+                    }
+                }
+            }
+        }
+        security-zone HK {
+            interfaces {
+                ge-0/0/1.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ping;
+                            telnet;
+                            http;
+                        }
+                    }
+                }
+            }
+        }
+        security-zone Internet {
+            address-book {
+                address 247_123 44.222.345.22/32;
+                address 51_130 44.222.345.11/32;
+                    address 24_98;
+                }
+            }
+            screen untrust-screen;
+            interfaces {
+                ge-0/0/0.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            ssh;
+                            ike;
+                            ping;
+                            https;
+                        }
+                    }
+                }
+            }
+            application-tracking;
+        }
+        security-zone MSTP {
+            address-book {
+                address 1_2 172.16.1.2/32;
+            }
+            interfaces {
+                ge-0/0/3.0 {
+                    host-inbound-traffic {
+                        system-services {
+                            all;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+firewall {
+    family inet {
+        filter denyac {
+            term deny-list {
+                from {
+                    prefix-list {
+                        denylist-attack;
+                    }
+                }
+                then {
+                    discard;
+                }
+            }
+            term other-accept {
+                then accept;
+            }
+        }
+    }
+    filter cnc {
+        term ISP {
+            from {
+                source-address {
+                    10.18.195.100/32;
+                }
+                destination-address {
+                    44.222.34.0/24;
+                }
+            }
+            then {
+                routing-instance ISP;
+            }
+        }
+        term accept {
+            then accept;
+        }
+    }
+    filter manager-ip {
+        term block_non_manager {
+            from {
+                source-address {
+                    0.0.0.0/0;
+                }
+                source-prefix-list {
+                    manager-ip except;
+                }
+                protocol tcp;
+                destination-port [ ssh https telnet http ];
+            }
+            then {
+                discard;
+            }
+        }
+        term accept_everything_else {
+            then accept;
+        }
+    }
+}
+access {
+    profile remote_access_profile {
+        authentication-order password;
+        client cof {
+            firewall-user {
+                password "$9$t1o2OBE7NboaU-dk.5T3nlKvWNdgoJ"; ## SECRET-DATA
+            }
+        }
+        address-assignment {
+            pool dyn-vpn-address-pool;
+        }
+    }
+    address-assignment {
+        pool dyn-vpn-address-pool {
+            family inet {
+                network 10.18.200.0/24;
+                xauth-attributes {
+                    primary-dns 114.114.114.114/32;
+                }
+            }
+        }
+    }
+    firewall-authentication {
+        web-authentication {
+            default-profile remote_access_profile;
+        }
+    }
+}
+applications {
+    application tcp-80 {
+        protocol tcp;
+        destination-port 80;
+    }
+    application tcp-8081 {
+        protocol tcp;
+        destination-port 8081;
+    }
+    application tcp-9999 {
+        protocol tcp;
+        destination-port 9999;
+    }
+   
+    application-set ftp_group {
+        application ftp-21;
+        application ftp-13001;
+        application ftp-13002;
+        application ftp-13003;
+        application tcp-7710;
+    }
+    application-set uat_group {
+        application tcp-7074;
+        application tcp-80;
+        application tcp-443;
+        application tcp-8443;
+    }
+  
+    application-set salesbo_group {
+        application tcp-443;
+    }
+}
