@@ -1,0 +1,87 @@
+
+Juniper SRX防火墙-Dynamic VPN解决方案 (2011-11-27 00:59:46)
+
+	
+Dynamic VPN  //最新远程VPN解决方案，默认2个授权！
+xp-------srx-----inside1
+
+
+
+set system services web-management https system-generated-certificate
+set security zones security-zone Outside interface fe-0/0/0.0 host-inbound-traffic ssh
+set security zones security-zone Outside interface fe-0/0/0.0 host-inbound-traffic ike
+set security zones security-zone Outside interface fe-0/0/0.0 host-inbound-traffic ping
+set security zones security-zone Outside interface fe-0/0/0.0 host-inbound-traffic https
+
+edit access address-assignment pool dyn-vpn-address-pool
+edit family inet
+set network 123.1.1.0/24
+edit range dvpn-range
+set low 123.1.1.100
+set high 123.1.1.200
+set xauth-attributes primary-dns 8.8.8.8/32
+
+ 
+
+配置Access Profile
+edit profile dyn-vpn-access-profile
+set client remoteuser firewall-user password cisco
+set address-assignment pool dyn-vpn-address-pool
+set firewall-authentication web-authentication default-profile dyn-vpn-access-profile
+
+ 
+
+配置第一阶段策略：
+edit security ike policy ike-dyn-vpn-policy
+set mode aggressive
+set proposal-set standard  //调用系统标准的proposal
+set pre-shared-key ascii-text cisco
+
+edit gaeway dyn-vpn-local-gw
+set ike-policy ike-dyn-vpn-policy
+edit dynamic
+set hostname dyvpn
+set connection-limit 10
+set ike-user-type group-ike-id    //所有的用户都用相同的用户ID！
+up
+up
+
+set external-interface fe-0/0/0.0
+set xauth access-profile dyn-vpn-access-profile
+
+ 
+
+配置第二阶段策略：
+edit ipsec policy ipsec-dyn-vpn-policy
+set proposal-set standard 
+up
+edit vpn dyn-vpn ike
+set gatway dyn-vpn-local-gw
+set ipsec psec-dyn-vpn-policy
+
+ 
+
+配置Dynamic VPN策略！
+edit dynamic-vpn
+set access-profile dyn-vpn-access-profile
+edit clients all
+set remote-protected-resources 10/8  //类似隧道分割10.0.0.0/8
+set remote-exceptions 0/0
+set ipsec-vpn dyn-vpn  //把VPN关联
+set user remoteuser   //把相应的用户关联！
+
+ 
+
+配置Security Policy  //放行VPN流量
+edit security policies from-zone Outside to-zone Inside1 policy dyv-vpn-policy
+set match source-address any
+set match destination-address any
+set match application any
+set then permit tunnel ipsec-vpn dyn-vpn
+
+commit  //提交！！！
+----------------------------------------------
+show security ike security-associations
+show security ike active-peer
+show security ipsec security-associations
+show security dynamic-vpn users
