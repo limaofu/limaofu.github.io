@@ -1,0 +1,29 @@
+{
+  "inbounds": [{
+    "port": 3858,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "ef208e98-fa81-49a3-9b4e-03ee3d0ef7df",
+          "level": 1,
+          "alterId": 52
+        }
+      ]
+    },
+  "streamSetting": {
+    "network": "ws",
+    "wsSettings": {
+          "path": "/tmp"
+          }
+  }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }]
+}
