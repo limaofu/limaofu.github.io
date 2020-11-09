@@ -2,89 +2,277 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>limaofu_homepage</title>
+<title>Limaofu's github</title>
 <style>
-#maincontent {
-	width:700px;
+#divmain {
+	width:800px;
 	margin:0 auto;
-	background-color: #f0f0f0;
+	padding-top:1px;
+	background-color:#CBE08C;
 	}
-a {
+	
+ul {
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	overflow:hidden;
+	background-color:green;
+	}
+li {
+	float:left;
+	border-right:1px solid red;
+	}
+li a {
+	display:block;
+	color:white;
+	text-align:center;
+	padding:8px 10px;
 	text-decoration:none;
 	}
+li a:hover:not(.active){
+		background-color:gray;
+	}
+.active {
+	background-color:#64DFFF;
+	color:red;
+	}
+	
+.divcontent {
+	position:relative;
+	width:780px;
+	height:62px;
+	margin:4px auto;
+	padding:0 0;
+	clear:both;
+	border-style:dotted;
+	background-color:#f0f0f0;
+	}
+.divimg {
+	position:relative;
+	float:left;
+	width:60px;
+	height:60px;
+	left:5px;
+	}
+.divtext {
+	position:relative;
+	width:700px;
+	height:56px;
+	left:8px;
+	background-color:#d0d0d0;
+	padding:2px 2px;
+	text-align:left;
+	text-indent:5px;
+	overflow:hidden;
+	}
+	.divtext a {
+		text-decoration:none;
+		}
+	
+
 </style>
-</head>
 
 <body>
-<!--以下是主体部分---------Part 1 --------------------------------------------------------------------->
-<hr> <!--页面开头分割线-->
+<hr>
+<div id="divmain">
+<p style="text-indent:10px">here you can download any document free, 点击标题进行下载</p>
+	<div class="divcontent" style="height:40px">
+		<ul>
+			<li><a class="active" href="index.html">个人专业文档</a></li>
+			<li><a href="index_t2.html">其他</a></li>
+			<li><a href="index_t3.html">其他</a></li>
+			<li><a href="index_t4.html">xx相关</a></li>
+			<li><a href="index_t8.html">个人简介</a></li>
+		</ul>
+	</div>
 
 
-
-
-<div id="maincontent">
-
-<p style="color:#ff0000">
-怕😱😱
-	</p>
-<p>
-Hello friends, I am what , from China. My English name is Cof Lee .<br>
-Welcome to my homepage. If you have any question<br>
-You can contact me by Email: <span style="color:blue">cof8007@gmail.com</span> </br>
-这里是nobody的个人主页！
-</p>
-<img src="test.jpg"> <br>
-<h2>个人技术文档（下载后查看）</h2>
-	<a href="SSL证书原理及格式1.1.pdf">SSL证书原理及格式1.1.pdf</a> </br>
-	<a href="Juniper_SRX防火墙配置命令1.5.pdf">Juniper_SRX防火墙配置命令1.5.pdf</a> </br>
-	<a href="Nmap扫描教程.pdf">Nmap扫描教程.pdf</a> </br>
-	<a href="华为路由与交换配置命令.pdf">华为路由与交换配置命令.pdf</a> </br>
-	<a href="思科路由与交换配置命令.pdf">思科路由与交换配置命令.pdf</a> </br>
-	<a href="CentOS7操作命令基础篇1.2.pdf">CentOS7操作命令基础篇1.2.pdf</a> </br>
-	<a href="装系统教程专业版pre12.pdf">装系统教程专业版pre12.pdf</a> </br>
-	<a href="DNS域名相关知识.pdf">DNS域名相关知识.pdf</a> </br>
-	<a href="网络代理技术原理.pdf">网络代理技术原理.pdf</a> </br>
-	<a href="new_开源免费的网络工具软件.md">new_开源免费的网络工具软件.md</a> </br>
-	<a href="使用正向代理上网.pdf">使用正向代理上网.pdf</a> </br>
-	<a href="代理_端口转发_端口映射_NAT_概念释疑2.3.pdf">代理_端口转发_端口映射_NAT_概念释疑2.3.pdf</a> </br>
-	<a href="思科交换机acl应用要点.pdf">思科交换机acl应用要点.pdf</a> </br>
-	<a href="Centos7安装Nginx或OpenResty.pdf">Centos7安装Nginx或OpenResty.pdf</a> </br>
-	<a href="Centos7安装docker.pdf">Centos7安装docker.pdf</a> </br>
-	<a href="windows_server_2019安装docker.pdf">windows_server_2019安装docker.pdf</a> </br>
-	<a href="解决电脑双网卡无法上网的问题_2.pdf">解决电脑双网卡无法上网的问题_2.pdf</a> </br>
-	<a href="Hyper_V给虚拟机换磁盘_centos.pdf">Hyper_V给虚拟机换磁盘_centos.pdf</a> </br>
-	<a href="Centos6.x升级至7.2.pdf">Centos6.x升级至7.2.pdf</a> </br>
-<br>
-<h2>其他文档</h2>
-<a href="https://github.com/limaofu/rime_X_dict" target="_blank">Rime五笔86_cof扩展方案</a> <br>
-
-<h2>配置demo</h2>
-<a href="config.json" target="_blank">v2ray的服务端ws配置案例</a> <br>
-<a href="test.pac" target="_blank">浏览器代理pac配置脚本demo</a> <br>
-
-<p>下载软件： http://sysyear.top:4600 </p>
-
-<h2>Windows域控</h2>
-<a href="windows10ver.txt" target="_blank">Windows 10's version code</a> <br>
-<a href="CentOS7加域的方法.txt" target="_blank">CentOS7加域的方法</a> <br>
-<a href="各软件激活码.html" target="_blank">各软件激活码</a> <br>
-
-<h2>CentOS 7</h2>
-<a href="Centos自动记录脚本.txt" target="_blank">CentOS自动记录脚本</a> <br>
-<a href="centos安装https证书.txt" target="_blank">CentOS安装https证书</a> <br>
-<h2>Juniper SRX防火墙</h2>
-<a href="Juniper配置样例.txt" target="_blank">Juniper配置样例</a> <br>
-<a href="JuniperSRX防火墙配置dvpn.txt" target="_blank">JuniperSRX防火墙配置dvpn</a><br>
-<a href="Hyper_V集群高可用配置.docx">Hyper-V集群高可用配置.docx</a><br>
-<a href="JuniperSRX防火墙配置命令1.4.pdf">Juniper-SRX防火墙配置命令1.4</a><br>
-
-<p>这个网站是github上的个人主页，国内访问速度较慢，可以转到我的另一个主页上： http://www.sysyear.top </p>
-<a href="http://www.sysyear.top/index.html" target="_blank">点击跳转到我的另一主页</a> <br>
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/aida64_extreme.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/AWS虚拟机pem密钥的使用.pdf"><span style="font-size:24px">AWS虚拟机pem密钥的使用.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/CentOS7操作命令基础篇1.2.pdf"><span style="font-size:24px">CentOS7操作命令基础篇1.2.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Centos6.x升级至7.2.pdf"><span style="font-size:24px">Centos6.x升级至7.2.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Centos7安装Nginx或OpenResty.pdf"><span style="font-size:24px">Centos7安装Nginx或OpenResty.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Centos7安装docker.pdf"><span style="font-size:24px">Centos7安装docker.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/DNS域名相关知识.pdf"><span style="font-size:24px">DNS域名相关知识.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Docker使用手册1.1.pdf"><span style="font-size:24px">Docker使用手册1.1.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Hyper_V给虚拟机换磁盘_centos_1.1.pdf"><span style="font-size:24px">Hyper_V给虚拟机换磁盘_centos_1.1.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Juniper_SRX防火墙配置命令1.5.pdf"><span style="font-size:24px">Juniper_SRX防火墙配置命令1.5.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/Nmap扫描教程.pdf"><span style="font-size:24px">Nmap扫描教程.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/SSL证书原理及格式1.2.pdf"><span style="font-size:24px">SSL证书原理及格式1.2.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/VMware的三种网络模式详解.pdf"><span style="font-size:24px">VMware的三种网络模式详解.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	dell_R730远程安装系统.pdf
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/dell_R730远程安装系统.pdf"><span style="font-size:24px">dell_R730远程安装系统.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/iperf测速工具.pdf"><span style="font-size:24px">iperf测速工具.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/windows_server_2019安装docker.pdf"><span style="font-size:24px">windows_server_2019安装docker.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/代理_端口转发_端口映射_NAT_概念释疑2.3.pdf"><span style="font-size:24px">代理_端口转发_端口映射_NAT_概念释疑2.3.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/使用正向代理上网.pdf"><span style="font-size:24px">使用正向代理上网.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/华为路由与交换配置命令.pdf"><span style="font-size:24px">华为路由与交换配置命令.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/思科交换机acl应用要点.pdf"><span style="font-size:24px">思科交换机acl应用要点.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/思科路由与交换配置命令.pdf"><span style="font-size:24px">思科路由与交换配置命令.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/知识库_Windows域控管理及常用组策略.pdf"><span style="font-size:24px">知识库_Windows域控管理及常用组策略.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/知识库_Windows系统操作手册1.2.pdf"><span style="font-size:24px">知识库_Windows系统操作手册1.2.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/网络代理技术原理.pdf"><span style="font-size:24px">网络代理技术原理.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/装系统教程专业版pre15.pdf"><span style="font-size:24px">装系统教程专业版pre15.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/解决电脑双网卡无法上网的问题_2.pdf"><span style="font-size:24px">解决电脑双网卡无法上网的问题_2.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	<div class="divcontent">
+		<div class="divimg"><img src="tp1/grub4dos_1.1_cn.jpg" width="60" height="60"></div>
+		<div class="divtext"><a href="t1/在Windows10下使用HyperV.pdf"><span style="font-size:24px">在Windows10下使用HyperV.pdf</span></a><br>
+			简介：暂无
+		</div>
+	</div>
+	
+	
 </div>
-
-
-
-<hr> <!--页面结尾分割线-->
-<!--以上是主体部分----------End part 1 ---------------------------------------------------------------->
+<hr>
+<hr>
 </body>
 </html>
