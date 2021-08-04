@@ -1,0 +1,147 @@
+
+服务端安装：
+# yum install nfs-utils rpcbind
+# mkdir /nfs
+# chown -R nfsnobody:nfsnobody /nfs
+# vi /etc/exports
+/nfs  152.10.81.0/24(rw,no_root_squash,no_all_squash,sync)
+
+# systemctl start rpcbind
+# systemctl start nfs
+# systemctl start nfs-server
+# systemctl enable rpcbind
+# systemctl enable nfs
+# systemctl enable nfs-server
+
+# exportfs -r		//使配置生效，重新导出共享
+# exportfs -u		//取消导出，卸载某导出，和-a一起使用则卸载所有导出
+# exportfs -v		//显示详细信息
+# exportfs -a		//全部挂载或卸载/etc/exports中的内容
+# exportfs -arv
+
+# rpcinfo -p localhost		//查看RPC服务注册状况
+# showmount -e localhost		//查看导出的共享目录
+# showmount -a		//查看所有被挂载的共享及客户端对应关系
+# showmount -d		//查看导出的，被客户端挂载了的
+
+# firewall-cmd --add-server=nfs , rpc-bind , mountd
+或者2049 , 111, 20048
+
+# vi /etc/sysconfig/nfs			//让mountd和quotad进程监听固定端口
+MOUNTD_PORT = 20048
+RPCRQUOTADOPTS = "-P 30001"
+LOCKD_TCPPORT = 30002
+LOCKD_UDPPORT = 30002
+RPCMOUNTDOPTS = "-p 30003"
+STATDARG = "-p 30004"
+
+
+MOUNTD_PORT = 20048
+STATD_PORT = 30004
+LOCKD_TCPPORT = 30002
+LOCKD_UDPPORT = 30002
+RQUOTAD_PORT = 30001
+
+# setsebool -p nfs_export_all_rw on
+# setsebool -p use_nfs_home_dirs on
+默认/var/lib/nfs目录下文件可访问
+其他目录要有type: var_lib_nfs_t
+# semanage fcontext -a -t var_lib_nfs_t '/nfs(/.*)?'
+# restorecon -Rv /nfs
+
+
+
+客户端使用：
+# yum install nfs-utils rpcbind
+# mkdir /nfspoint
+# showmount -e 10.1.1.x
+# mount -t nfs 10.1.1.x:/nfs /nfspoint [ -o proto=tcp -o nolock ]
+# df -Th
+# umount /nfspoint
+执行fuser -km /var/nfs/，然后再执行umount
+开机自动挂载：
+# vi /etc/fstab
+10.1.1.x:/nfs   /nfspoint   nfs   default,_netdev   0 0
+
+
+
+
+
+
+
+NTP服务安装：
+# systemctl disable chronyd ?
+# rpm -qa | grep ntp
+# yum install ntp ntpdate
+# systemctl start/enable ntpd
+# vi /etc/ntp.conf
+server x.x.x.x iburst
+restrict 127.0.0.1
+restrict -6 ::1
+fudge 127.127.1.0 stratum 10
+logfile /var/log/ntp.log
+
+# systemctl start ntpd
+# systemctl enable ntpd
+#防火墙放开123/udp
+
+配置详解：
+①server 主机名 key xxx(int32) version 4 prefer minpoll 4 maxpoll 14 iburst
+iburst 表示在一个标准的轮询间隔内没有应答，客户端会发送一定数量的包给服务器，（自己为客户端），突发4/8个，每2秒发一个
+minpoll 最小请求频率，2的n次方
+maxpoll 最大请求频率，（4~14）默认为6（则64秒），10则1024秒
+
+②restrict 客户ip段 mask 255.255.255.0 nomodify notrap 
+-6 后接ipv6地址
+ignore 拒绝所有ntp客户端连接
+nomodify 客户端不能更改服务端（自己）的时间参数
+notrust 客户只有认证通过才信任，否则拒绝没有认证的客户
+noquery 不提供客户端的时间查询
+notrap 不发送trap
+nopeer 用于阻止主机尝试与服务器对等
+kod 访问违规时发送KOD包
+
+客户端：
+# yum install ntp ntpdate
+# systemctl start/enable ntpd
+# ntpstat
+# ntpdate -u x.x.x.x		//手动更新时间，未开启ntpd时
+# ntpq -p 		//各字段如下：
+remote 服务器ip，之前的符号：
+	*当前使用的服务器
+	+良好的服务器
+	空格 无响应的ntp服务器
+	x无法连接
+refid ntp服务器使用的更高一级服务器的名称/ip
+st ntp服务器的级别，1~16，16为不可达
+t  类型，u为单播，b广播，m多播，l本地时钟
+when 上一次成功请求后到现在的秒数
+poll 同步周期，秒
+reach 和服务器每成功同步一次，值就增加1（8进制）
+delay 请求包往返时间，毫秒
+offset 本机与ntp服务器的时间差，毫秒
+jitter 统计某个范围内，offset的分布情况，数值越小，主机的时间越精确
+
+
+chrony
+# yum install chrony
+# systemctl start/enable chronyd
+# vi /etc/chrony.conf
+server x.x.x.x iburst [ minpoll 6 maxpoll 14 ]
+local stratum 10
+allow 10.1.1.0/24		//或 allow 10.1.1/24
+rtcsync		//启用RTC的内核同步，应用到bios时间
+keyfile /etc/xx.key		//ntp验证文件
+logdir //var/log/chronyd.log
+logchange 0.5		//秒，如果时钟调整大于0.5秒则向系统日志发消息
+
+# chronyc sourcestats -v
+# chronyc sources -v
+# chronyc
+> tracking		//显示系统时间信息
+> activity		//查看在线/离线的ntp服务器
+> makestep		//立即同步
+
+
+
+
